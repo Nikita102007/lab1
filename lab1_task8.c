@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <limits.h>
+#include <sys/stat.h>
 
 #define MIN_SIZE    8
 
@@ -162,6 +163,23 @@ int main(int argc, char *argv[])
     }
 
     if (filename_validator(argv[1]) != STATUS_OK || filename_validator(argv[2]) != STATUS_OK) {
+        printf("Status: %d\n", STATUS_INVALID_ARGS);
+        return STATUS_INVALID_ARGS;
+    }
+
+    struct stat s1, s2;
+
+    int input_exists = (stat(argv[1], &s1) == 0);
+    int output_exists = (stat(argv[2], &s2) == 0);
+
+    if (!input_exists) {
+        printf("Status: %d\n", STATUS_ERR_OPEN_FILE);
+        return STATUS_ERR_OPEN_FILE;
+    }
+
+    if (output_exists &&
+        s1.st_dev == s2.st_dev &&
+        s1.st_ino == s2.st_ino) {
         printf("Status: %d\n", STATUS_INVALID_ARGS);
         return STATUS_INVALID_ARGS;
     }
